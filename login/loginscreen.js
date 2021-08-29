@@ -1,115 +1,121 @@
-import React, { Component } from 'react';
-import {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  View,TouchableOpacity,TextInput,Button,Keyboard
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, StatusBar, Modal, Button } from 'react-native';
 
+export default function App() {
+    const [isLoading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
 
-export default class login extends Component {
-	
-	constructor(props){
-		super(props)
-		this.state={
-			userEmail:'',
-			userPassword:''
-		}
-	}
-	
-	login = () =>{
-		const {userEmail,userPassword} = this.state;
-		let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ ;
-		if(userEmail==""){
-			//alert("Please enter Email address");
-		  this.setState({email:'Please enter Email address'})
-			
-		}
-		
-		else if(reg.test(userEmail) === false)
-		{
-		//alert("Email is Not Correct");
-		this.setState({email:'Email is Not Correct'})
-		return false;
-		  }
+  const [txtUserLogin, setTextInputValueUser] = React.useState('');
+  const [txtPassword, setTextInputValuePassword] = React.useState('');
 
-		else if(userPassword==""){
-		this.setState({email:'Please enter password'})
-		}
-		else{
-		
-		fetch('https://hardeepwork.000webhostapp.com/react/login.php',{
-			method:'post',
-			header:{
-				'Accept': 'application/json',
-				'Content-type': 'application/json'
-			},
-			body:JSON.stringify({
-				// we will pass our input data to server
-				email: userEmail,
-				password: userPassword
-			})
-			
-		})
-		.then((response) => response.json())
-		 .then((responseJson)=>{
-			 if(responseJson == "ok"){
-				 // redirect to profile page
-				 alert("Successfully Login");
-				 this.props.navigation.navigate("Profile");
-			 }else{
-				 alert("Wrong Login Details");
-			 }
-		 })
-		 .catch((error)=>{
-		 console.error(error);
-		 });
-		}
-		
-		
-		Keyboard.dismiss();
-	}
-	
-  render() {
-    return (
-	<View style={styles.container}>    
-	<Text style={{padding:10,margin:10,color:'red'}}>{this.state.email}</Text>
-	
-	<TextInput
-	placeholder="Enter Email"
-	style={{width:200, margin:10}}
-	onChangeText={userEmail => this.setState({userEmail})}
-	/>
-	
-	<TextInput
-	placeholder="Enter Password"
-	style={{width:200, margin:10}}
-	onChangeText={userPassword => this.setState({userPassword})}
-	
-	/>
-	
-	
-	<TouchableOpacity
-	onPress={this.login}
-	style={{width:200,padding:10,backgroundColor:'magenta',alignItems:'center'}}>
-	<Text style={{color:'white'}}>Login</Text>
-	</TouchableOpacity>
-	
-	
-     </View>
-  
-   );
+  const getDataUser = async () => {
+     if(txtUserLogin == "" || txtPassword == ""){
+        alert("LOGIN NAME atau PASSWORD tidak boleh kosong");
+     }
+     else{
+        try 
+        {
+         const response = await fetch('http://103.58.100.219:7071/api/Mobile/GetUser?loginName='+txtUserLogin+'&password='+txtPassword+'');
+         const json = await response.json();
+         setData(json.returnValue);
+         if(json.message == "Success"){
+           alert("Login Sukes, Tapi belum belajar route navigasi :(")
+         }
+         else{
+             alert("Login Gagal. Periksa kembali LOGIN NAME dan PASSWORD Anda")
+         }
+       } catch (error) {
+         console.error(error);
+       } finally {
+         setLoading(false);
+       }
+     }
   }
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-
-});
-
-AppRegistry.registerComponent('login', () => login);
+   
+    return (
+      <View style={styles.container}>
+        <Image style={styles.image} source={require("../assets/Logo.png")} />
+   
+        <StatusBar style="auto" />
+        <View style={styles.inputView}>
+          <TextInput
+            style={styles.TextInput}
+            placeholder="Login Name"
+            placeholderTextColor="#ffffff"
+            onChangeText={text => setTextInputValueUser(text)}
+            value={txtUserLogin}
+          />
+        </View>
+   
+        <View style={styles.inputView}>
+          <TextInput
+            style={styles.TextInput}
+            placeholder="Password"
+            placeholderTextColor="#ffffff"
+            secureTextEntry={true}
+            onChangeText={text => setTextInputValuePassword(text)} 
+            value={txtPassword}
+          />
+        </View>
+   
+        <TouchableOpacity>
+          <Text style={styles.forgot_button}>Forgot Password?</Text>
+        </TouchableOpacity>
+   
+        <TouchableOpacity style={styles.loginBtn} onPress={getDataUser}>
+          <Text style={styles.loginText}>LOGIN</Text>
+        </TouchableOpacity>
+        
+      </View>
+    );
+  }
+   
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+   
+    image: {
+      marginBottom: 40,
+    },
+   
+    inputView: {
+      backgroundColor: "#abdbe3",
+      borderRadius: 10,
+      width: "90%",
+      height: 45,
+      marginBottom: 20,
+   
+      alignItems: "flex-start",
+    },
+   
+    TextInput: {
+      height: 50,
+      flex: 1,
+      padding: 10,
+      marginLeft: 20,
+      width: 100,
+    },
+   
+    forgot_button: {
+      height: 30,
+      marginBottom: 30,
+    },
+   
+    loginBtn: {
+      width: "40%",
+      borderRadius: 25,
+      height: 50,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 40,
+      backgroundColor: "#2596be",
+    },
+    loginText: {
+        color: "white",
+        fontWeight: "bold",
+    }
+  });

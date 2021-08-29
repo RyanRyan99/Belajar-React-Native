@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Text, TouchableOpacity, View, StyleSheet, TextInput } from 'react-native';
+import { Text, TouchableOpacity, View, StyleSheet, TextInput } from 'react-native';
 
 export default App = ({navigation}) => {
+
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
@@ -9,24 +10,29 @@ export default App = ({navigation}) => {
   const [txtPassword, setTextInputValuePassword] = React.useState('');
 
   const getDataUser = async () => {
-     try 
-     {
-      const response = await fetch('http://103.58.100.219:7071/api/Mobile/GetUser?loginName='+txtUserLogin+'&password='+txtPassword+'');
-      const json = await response.json();
-      setData(json.returnValue);
-      if(json.message == "Success"){
-        alert("Login Sukses")
-      }
-      else{
-          alert("gagal")
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+     if(txtUserLogin == "" || txtPassword == ""){
+        alert("LOGIN NAME atau PASSWORD tidak boleh kosong");
+     }
+     else{
+        try 
+        {
+         const response = await fetch('http://103.58.100.219:7071/api/Mobile/GetUser?loginName='+txtUserLogin+'&password='+txtPassword+'');
+         const json = await response.json();
+         setData(json.returnValue);
+         if(json.message == "Success"){
+           alert("Login Sukes")
+         }
+         else{
+             alert("Login Gagal. Periksa kembali LOGIN NAME dan PASSWORD Anda")
+         }
+       } catch (error) {
+         console.error(error);
+       } finally {
+         setLoading(false);
+       }
+     }
   }
-  
+
   return (
     <View style={styles.container}>
       <TextInput placeholder="Login Name" style={{width:200, margin:10}} onChangeText={text => setTextInputValueUser(text)} value={txtUserLogin}>
